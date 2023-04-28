@@ -1,0 +1,60 @@
+server:
+  port: 8082
+spring:
+  application:
+    name: order-service
+  profiles:
+    default: local
+  datasource:
+    url: jdbc:${spring.datasource.driver}://${spring.datasource.host}:${spring.datasource.port}/${spring.datasource.database}
+    # Connection pooling
+    driverClassName: com.mysql.cj.jdbc.Driver
+    type: com.zaxxer.hikari.HikariDataSource
+    hikari:
+      connection-timeout: ${spring.datasource.connectionPool.timeout}
+      idle-timeout: ${spring.datasource.connectionPool.idleTimeout}
+      max-lifetime: ${spring.datasource.connectionPool.maxLifetime}
+      maximum-pool-size: ${spring.datasource.connectionPool.maximumPoolSize}
+      minimum-idle: ${spring.datasource.connectionPool.minimumIdle}
+  liquibase:
+    enabled: ${spring.liquibaseConfig.isEnabled}
+    url: ${spring.datasource.url}
+    user: ${spring.datasource.username}
+    password: ${spring.datasource.password}
+    change-log: classpath:/db/liquibase/changelog-master.xml
+management:
+  trace:
+    http:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus,env,info,metrics,threaddump,httpexchanges,mappings
+      base-path: /management
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: always
+
+---
+# local and test profiles specific property configurations
+spring:
+  config:
+    activate:
+      on-profile: local,test
+  liquibaseConfig:
+    isEnabled: true
+  datasource:
+    host: localhost
+    port: 3306
+    driver: mysql
+    database: ms-monorepo-order-service-db
+    username: root
+    password: mysql@root@123
+    connectionPool:
+      timeout: 30000
+      idleTimeout: 600000
+      maxLifetime: 1800000
+      maximumPoolSize: 30
+      minimumIdle: 10

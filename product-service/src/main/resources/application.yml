@@ -1,0 +1,38 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: product-service
+  profiles:
+    default: local
+  data:
+    mongodb:
+      uri: mongodb://${mongodb.username}:${mongodb.password}@${mongodb.host}:${mongodb.port}/${mongodb.database}?authSource=${mongodb.authSource}
+management:
+  trace:
+    http:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus,env,info,metrics,threaddump,httpexchanges,mappings
+      base-path: /management
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: always
+
+---
+# local and test profiles specific property configurations
+spring:
+  config:
+    activate:
+      on-profile: local,test
+mongodb:
+  host: localhost
+  port: 27017
+  username: root
+  password: password
+  database: ms-monorepo-product-service-db
+  authSource: admin
