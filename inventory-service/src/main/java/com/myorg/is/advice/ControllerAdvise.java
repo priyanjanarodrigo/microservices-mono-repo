@@ -1,12 +1,14 @@
-package com.myorg.os.advice;
+package com.myorg.is.advice;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
-import com.myorg.os.entity.dto.response.error.ApiErrorResponse;
-import com.myorg.os.exception.InternalServerException;
-import com.myorg.os.exception.ResourceNotFoundException;
+import com.myorg.is.entity.dto.response.error.ApiErrorResponse;
+import com.myorg.is.exception.EmptyPatchRequestException;
+import com.myorg.is.exception.GeneralClientDataException;
+import com.myorg.is.exception.InternalServerException;
+import com.myorg.is.exception.ResourceNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -74,6 +76,12 @@ public class ControllerAdvise {
   public ResponseEntity<ApiErrorResponse> handleResourceNotFoundException(
       ResourceNotFoundException resourceNotFoundException, HttpServletRequest httpServletRequest) {
     return this.createErrorResponse(resourceNotFoundException, httpServletRequest, NOT_FOUND);
+  }
+
+  @ExceptionHandler({EmptyPatchRequestException.class, GeneralClientDataException.class})
+  public ResponseEntity<ApiErrorResponse> handleExceptionForBadRequests(
+      RuntimeException exception, HttpServletRequest httpServletRequest) {
+    return this.createErrorResponse(exception, httpServletRequest, BAD_REQUEST);
   }
 
   public ResponseEntity<ApiErrorResponse> createErrorResponse(RuntimeException exception,

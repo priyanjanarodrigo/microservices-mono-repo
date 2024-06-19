@@ -1,4 +1,4 @@
-package com.myorg.os.entity.dto.response.error;
+package com.myorg.is.entity.dto.response.error;
 
 import java.time.LocalDateTime;
 import lombok.Builder;
@@ -11,3 +11,4 @@ public record ApiErrorResponse(
     LocalDateTime timestamp) {
 
 }
+

@@ -24,4 +24,7 @@ public final class ProductRequest {
 
   @NotNull(message = "{product.request.price.notNull}")
   private BigDecimal price;
+
+  @NotBlank(message = "{product.request.skuCode.notBlank}")
+  private String skuCode;
 }

@@ -37,9 +37,10 @@ class ProductIntegrationTest extends AbstractIntegrationTest {
   @DisplayName("Product should be persisted to the database and should be able retrieve it back")
   void testCreateProductAndRetrieve() throws Exception {
     ProductRequest productRequest = ProductRequest.builder()
-        .name("Apple iPhone 14 Por Max")
+        .name("Apple iPhone 14 Por Max 256GB")
         .description("Flagship device launched by apple in 2022")
         .price(BigDecimal.valueOf(450000))
+        .skuCode("aip14pmx256")
         .build();
 
     MvcResult postMvcResult = mockMvc.perform(post(PRODUCT_BASE_URI)
@@ -50,6 +51,7 @@ class ProductIntegrationTest extends AbstractIntegrationTest {
         .andExpect(jsonPath("$.name").value(productRequest.getName()))
         .andExpect(jsonPath("$.description").value(productRequest.getDescription()))
         .andExpect(jsonPath("$.price").value(productRequest.getPrice()))
+        .andExpect(jsonPath("$.skuCode").value(productRequest.getSkuCode()))
         .andExpect(header().exists(LOCATION))
         .andReturn();
 
@@ -66,6 +68,7 @@ class ProductIntegrationTest extends AbstractIntegrationTest {
         .andExpect(jsonPath("$.name").value(productResponse.getName()))
         .andExpect(jsonPath("$.description").value(productResponse.getDescription()))
         .andExpect(jsonPath("$.price").value(productResponse.getPrice()))
+        .andExpect(jsonPath("$.skuCode").value(productResponse.getSkuCode()))
         .andReturn();
   }
 }

@@ -1,25 +1,13 @@
 package com.myorg.ps.entity.dto.response.error;
 
 import java.time.LocalDateTime;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
 
-@Data
 @Builder
-@ToString
-@NoArgsConstructor
-@AllArgsConstructor
-public final class ApiErrorResponse {
+public record ApiErrorResponse(
+    int statusCode,
+    String path,
+    String message,
+    LocalDateTime timestamp) {
 
-  private int statusCode;
-
-  private String path;
-
-  private String message;
-
-  private LocalDateTime timestamp;
 }
-

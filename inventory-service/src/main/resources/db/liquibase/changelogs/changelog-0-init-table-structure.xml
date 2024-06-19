@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+  <changeSet id="CL-0-CS-0" author="Priyanjana">
+    <createTable tableName="INVENTORY">
+      <column name="ID" type="UUID">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="INVENTORY_TABLE_PK"/>
+      </column>
+      <column name="SKU_CODE" type="VARCHAR(255)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="REORDER_LEVEL" type="INT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="AVAILABLE_QUANTITY" type="INT">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+
+  <changeSet id="CL-0-CS-1" author="Priyanjana">
+    <createIndex indexName="SKUCODE_INDEX" tableName="INVENTORY" unique="true">
+      <column name="SKU_CODE"/>
+    </createIndex>
+  </changeSet>
+</databaseChangeLog>

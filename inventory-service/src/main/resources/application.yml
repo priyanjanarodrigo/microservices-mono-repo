@@ -1,14 +1,14 @@
+# Common property configurations
 server:
-  port: 8082
+  port: 8083
 spring:
   application:
-    name: order-service
+    name: inventory-service
   profiles:
     default: local
   datasource:
-    url: jdbc:${spring.datasource.driver}://${spring.datasource.host}:${spring.datasource.port}/${spring.datasource.database}
-    # Connection pooling
-    driverClassName: com.mysql.cj.jdbc.Driver
+    url: jdbc:${spring.datasource.driver}://${spring.datasource.host}:${spring.datasource.port}/${spring.datasource.database}?schema=${spring.datasource.schema}
+    driverClassName: org.postgresql.Driver
     type: com.zaxxer.hikari.HikariDataSource
     hikari:
       connection-timeout: ${spring.datasource.connectionPool.timeout}
@@ -38,7 +38,6 @@ management:
       show-details: always
 
 ---
-# local and test profiles specific property configurations
 spring:
   config:
     activate:
@@ -47,11 +46,12 @@ spring:
     isEnabled: true
   datasource:
     host: localhost
-    port: 3306
-    driver: mysql
-    database: ms-monorepo-order-service-local
-    username: root
-    password: mysql@root@123
+    port: 5434
+    driver: postgresql
+    database: ms-monorepo-inventory-service-local
+    schema: public
+    username: postgres
+    password: postgres@15
     connectionPool:
       timeout: 30000
       idleTimeout: 600000

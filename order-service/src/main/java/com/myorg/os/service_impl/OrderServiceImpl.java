@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.reactive.function.client.WebClient;
 
 @Slf4j
 @Service(value = "orderServiceImpl")
@@ -25,11 +26,20 @@ public class OrderServiceImpl implements OrderService {
 
   private final OrderLineItemService orderLineItemService;
 
+  private final WebClient webClient;
+
   @Override
   @Transactional
   public OrderResponse placeOrder(OrderRequest orderRequest) {
     try {
       Order orderInitial = Order.builder().orderNumber(UUID.randomUUID()).build();
+
+      // Check whether the stocks are available for each order line item before proceeding
+//      webClient.get()
+//          .uri("http://localhost:8083/api/inventories")
+//          .retrieve()
+//          .bodyToMono()
+
       Order order = orderRepository.save(orderInitial);
 
       List<OrderLineItemResponse> orderLineItemResponses = orderLineItemService

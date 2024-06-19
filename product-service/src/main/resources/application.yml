@@ -31,8 +31,8 @@ spring:
       on-profile: local,test
 mongodb:
   host: localhost
-  port: 27017
+  port: 27019
   username: root
   password: password
-  database: ms-monorepo-product-service-db
+  database: ms-monorepo-product-service-local
   authSource: admin
