@@ -10,6 +10,6 @@ import org.springframework.stereotype.Repository;
 @Repository(value = "inventoryRepository")
 public interface InventoryRepository extends JpaRepository<Inventory, UUID> {
 
-  @Query(value = "SELECT COUNT(inv) > 0 FROM Inventory inv WHERE inv.sku_code = :skuCode", nativeQuery = true)
+  @Query(value = "SELECT COUNT(inv) > 0 FROM Inventory inv WHERE inv.skuCode = :skuCode")
   boolean existsBySkuCode(@Param("skuCode") String skuCode);
 }

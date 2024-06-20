@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import java.net.URI;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.validator.constraints.UUID;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(value = INVENTORY_BASE_URI)
 @RequiredArgsConstructor
 @Validated
+@Slf4j
 public class InventoryController {
 
   private final InventoryService inventoryService;
@@ -42,6 +44,9 @@ public class InventoryController {
   @PostMapping
   public ResponseEntity<InventoryResponse> saveInventoryRecord(
       @Valid @RequestBody InventoryRequest inventoryRequest) {
+
+    log.info("saveInventoryRecord invoked with inventory request payload: {}", inventoryRequest);
+
     InventoryResponse inventoryResponse = inventoryService.saveInventoryRecord(inventoryRequest);
     return created(URI.create(INVENTORY_BASE_URI + "/" + inventoryResponse.id()))
         .body(inventoryResponse);
@@ -53,6 +58,7 @@ public class InventoryController {
       @UUID(message = "{inventory.controller.pathVariable.id.uuid}")
       @PathVariable String id
   ) {
+    log.info("getInventoryRecordById invoked with path variable id: {}", id);
     return ok(inventoryService.findInventoryRecordById(id));
   }
 
@@ -63,6 +69,9 @@ public class InventoryController {
       @PathVariable String id,
       @Valid @RequestBody InventoryPatchRequest inventoryPatchRequest
   ) {
+    log.info(
+        "patchInventoryRecord invoked with path variable id: {} and inventory patch request payload: {}",
+        id, inventoryPatchRequest);
     return ok(inventoryService.patchInventoryRecord(id, inventoryPatchRequest));
   }
 }

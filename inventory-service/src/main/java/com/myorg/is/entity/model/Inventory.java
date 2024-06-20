@@ -18,7 +18,7 @@ import lombok.ToString;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity(name = "INVENTORY")
+@Entity(name = "Inventory")
 @Table(name = "INVENTORY")
 public class Inventory {
 

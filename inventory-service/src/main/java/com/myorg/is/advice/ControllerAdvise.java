@@ -41,7 +41,7 @@ public class ControllerAdvise {
             Collectors.toMap(
                 FieldError::getField,
                 DefaultMessageSourceResolvable::getDefaultMessage,
-                (firstKey, secondKey) -> secondKey,
+                (existingValue, newValue) -> newValue,
                 HashMap::new
             )
         );
