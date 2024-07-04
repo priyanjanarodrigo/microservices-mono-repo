@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ManagementConfiguration {
 
-  @Bean
+  @Bean(name = "httpTraceRepository")
   public HttpExchangeRepository httpTraceRepository() {
     return new InMemoryHttpExchangeRepository();
   }

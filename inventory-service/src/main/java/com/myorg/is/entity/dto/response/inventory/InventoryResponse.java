@@ -1,4 +1,4 @@
-package com.myorg.is.entity.dto.request;
+package com.myorg.is.entity.dto.response.inventory;
 
 import java.util.UUID;
 import lombok.Builder;

@@ -1,8 +1,9 @@
 package com.myorg.is.annotation;
 
+import static java.util.Objects.isNull;
+
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-import java.util.Objects;
 
 public class NotBlankIfPresentValidator implements ConstraintValidator<NotBlankIfPresent, String> {
 
@@ -27,6 +28,6 @@ public class NotBlankIfPresentValidator implements ConstraintValidator<NotBlankI
    */
   @Override
   public boolean isValid(String value, ConstraintValidatorContext constraintValidatorContext) {
-    return Objects.isNull(value) || !value.isBlank();
+    return isNull(value) || !value.isBlank();
   }
 }

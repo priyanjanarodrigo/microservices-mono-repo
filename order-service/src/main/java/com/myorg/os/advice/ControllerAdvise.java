@@ -1,11 +1,15 @@
 package com.myorg.os.advice;
 
+import static java.util.stream.Collectors.toMap;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 import com.myorg.os.entity.dto.response.error.ApiErrorResponse;
+import com.myorg.os.exception.BadRequestException;
 import com.myorg.os.exception.InternalServerException;
+import com.myorg.os.exception.OutOfStockException;
 import com.myorg.os.exception.ResourceNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
@@ -13,7 +17,6 @@ import jakarta.validation.ConstraintViolationException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,13 +38,11 @@ public class ControllerAdvise {
         .getBindingResult()
         .getFieldErrors()
         .stream()
-        .collect(
-            Collectors.toMap(
-                FieldError::getField,
-                DefaultMessageSourceResolvable::getDefaultMessage,
-                (firstKey, secondKey) -> secondKey,
-                HashMap::new
-            )
+        .collect(toMap(
+            FieldError::getField,
+            DefaultMessageSourceResolvable::getDefaultMessage,
+            (firstKey, secondKey) -> secondKey,
+            HashMap::new)
         );
   }
 
@@ -53,7 +54,7 @@ public class ControllerAdvise {
     return constraintViolationException
         .getConstraintViolations()
         .stream()
-        .collect(Collectors.toMap(
+        .collect(toMap(
             constraintViolation -> {
               String propertyPath = constraintViolation.getPropertyPath().toString();
               return (propertyPath.contains("."))
@@ -76,15 +77,25 @@ public class ControllerAdvise {
     return this.createErrorResponse(resourceNotFoundException, httpServletRequest, NOT_FOUND);
   }
 
+  @ExceptionHandler(BadRequestException.class)
+  public ResponseEntity<ApiErrorResponse> handleBadRequestException(
+      RuntimeException runtimeException, HttpServletRequest httpServletRequest) {
+    return this.createErrorResponse(runtimeException, httpServletRequest, BAD_REQUEST);
+  }
+
+  @ExceptionHandler(OutOfStockException.class)
+  public ResponseEntity<ApiErrorResponse> handleConflictException(
+      RuntimeException runtimeException, HttpServletRequest httpServletRequest) {
+    return this.createErrorResponse(runtimeException, httpServletRequest, CONFLICT);
+  }
+
   public ResponseEntity<ApiErrorResponse> createErrorResponse(RuntimeException exception,
       HttpServletRequest httpServletRequest, HttpStatus httpStatus) {
-    ApiErrorResponse apiErrorResponse = ApiErrorResponse.builder()
+    return new ResponseEntity<>(ApiErrorResponse.builder()
         .statusCode(httpStatus.value())
         .path(httpServletRequest.getRequestURI())
         .message(exception.getMessage())
         .timestamp(LocalDateTime.now())
-        .build();
-
-    return new ResponseEntity<>(apiErrorResponse, httpStatus);
+        .build(), httpStatus);
   }
 }

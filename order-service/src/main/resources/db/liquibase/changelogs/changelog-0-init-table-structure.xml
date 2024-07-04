@@ -13,6 +13,9 @@
       <column name="ORDER_NUMBER" type="BINARY(16)">
         <constraints nullable="false"/>
       </column>
+      <column name="TOTAL" type="DECIMAL">
+        <constraints nullable="false"/>
+      </column>
     </createTable>
   </changeSet>
 
@@ -33,6 +36,9 @@
       <column name="ORDER_ID" type="BINARY(16)">
         <constraints nullable="false"/>
       </column>
+      <column name="UNIT_TOTAL" type="DECIMAL">
+        <constraints nullable="false"/>
+      </column>
     </createTable>
   </changeSet>
 
@@ -49,55 +55,3 @@
     />
   </changeSet>
 </databaseChangeLog>
-
-<!--  <?xml version="1.0" encoding="UTF-8"?>-->
-<!--<databaseChangeLog-->
-<!--xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"-->
-<!--xmlns="http://www.liquibase.org/xml/ns/dbchangelog"-->
-<!--xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-->
-<!--                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">-->
-
-<!--<changeSet id="CL-0-CS-0" author="Priyanjana">-->
-<!--  <createTable tableName="order_table">-->
-<!--    <column name="id" type="BINARY(16)">-->
-<!--      <constraints nullable="false" primaryKey="true" primaryKeyName="ORDER_TABLE_PK"/>-->
-<!--    </column>-->
-<!--    <column name="order_number" type="BINARY(16)">-->
-<!--      <constraints nullable="false"/>-->
-<!--    </column>-->
-<!--  </createTable>-->
-<!--</changeSet>-->
-
-<!--<changeSet id="CL-0-CS-1" author="Priyanjana">-->
-<!--  <createTable tableName="order_line_item">-->
-<!--    <column name="ORDER_LINE_ITEM_ID" type="BINARY(16)">-->
-<!--      <constraints nullable="false" primaryKey="true" primaryKeyName="ORDER_LINE_ITEM_PK"/>-->
-<!--    </column>-->
-<!--    <column name="SKU_CODE" type="VARCHAR(255)">-->
-<!--      <constraints nullable="false"/>-->
-<!--    </column>-->
-<!--    <column name="PRICE" type="DECIMAL">-->
-<!--      <constraints nullable="false"/>-->
-<!--    </column>-->
-<!--    <column name="QUANTITY" type="INT">-->
-<!--      <constraints nullable="false"/>-->
-<!--    </column>-->
-<!--    <column name="ORDER_ID" type="BINARY(16)">-->
-<!--      <constraints nullable="false"/>-->
-<!--    </column>-->
-<!--  </createTable>-->
-<!--</changeSet>-->
-
-<!--&lt;!&ndash; onDelete/onUpdate values: CASCADE, SET NULL, SET DEFAULT, RESTRICT, NO ACTION&ndash;&gt;-->
-<!--<changeSet id="CL-0-CS-2" author="Priyanjana">-->
-<!--  <addForeignKeyConstraint-->
-<!--    constraintName="ORDER_LINE_ITEM_FK"-->
-<!--    baseTableName="order_line_item"-->
-<!--    baseColumnNames="ORDER_ID"-->
-<!--    referencedTableName="order_table"-->
-<!--    referencedColumnNames="ID"-->
-<!--    onDelete="NO ACTION"-->
-<!--    onUpdate="NO ACTION"-->
-<!--  />-->
-<!--</changeSet>-->
-<!--</databaseChangeLog>-->

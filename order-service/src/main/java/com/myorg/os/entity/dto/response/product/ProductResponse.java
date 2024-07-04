@@ -1,4 +1,4 @@
-package com.myorg.ps.entity.dto.response.product;
+package com.myorg.os.entity.dto.response.product;
 
 import java.math.BigDecimal;
 import lombok.Builder;

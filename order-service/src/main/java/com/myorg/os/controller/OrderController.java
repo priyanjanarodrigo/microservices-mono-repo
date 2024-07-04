@@ -29,7 +29,7 @@ public class OrderController {
       HttpServletRequest httpServletRequest) {
     OrderResponse orderResponse = orderService.placeOrder(orderRequest);
     return ResponseEntity
-        .created(URI.create(httpServletRequest.getRequestURI() + "/" + orderResponse.getId()))
+        .created(URI.create(httpServletRequest.getRequestURI() + "/" + orderResponse.id()))
         .body(orderResponse);
   }
 }

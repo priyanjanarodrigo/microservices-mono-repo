@@ -6,24 +6,30 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.io.Serial;
+import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.Objects;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 
-@Data
+@Getter
+@Setter
 @Builder
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
-@Entity(name = "ORDER_LINE_ITEM")
+@Entity(name = "OrderLineItem")
 @Table(name = "ORDER_LINE_ITEM")
-public class OrderLineItem {
+public class OrderLineItem implements Serializable, Cloneable {
+
+  @Serial
+  private static final long serialVersionUID = -6787163492749587764L;
 
   @Id
   @Column(name = "ORDER_LINE_ITEM_ID")
@@ -39,7 +45,30 @@ public class OrderLineItem {
   @Column(name = "QUANTITY")
   private Integer quantity;
 
+  @Column(name = "UNIT_TOTAL")
+  private BigDecimal unitTotal;
+
   @Column(name = "ORDER_ID")
   private UUID orderId;
-}
 
+  @Override
+  public boolean equals(Object object) {
+    return object == this || object instanceof OrderLineItem orderLineItem
+        && Objects.equals(orderLineItemId, orderLineItem.getOrderLineItemId())
+        && Objects.equals(skuCode, orderLineItem.getSkuCode())
+        && Objects.equals(price, orderLineItem.getPrice())
+        && Objects.equals(quantity, orderLineItem.getQuantity())
+        && Objects.equals(unitTotal, orderLineItem.getUnitTotal())
+        && Objects.equals(orderId, orderLineItem.getOrderId());
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(orderLineItemId, skuCode, price, quantity, unitTotal, orderId);
+  }
+
+  @Override
+  public Object clone() throws CloneNotSupportedException {
+    return super.clone();
+  }
+}

@@ -25,13 +25,13 @@ import org.springframework.test.web.servlet.MvcResult;
 class ProductIntegrationTest extends AbstractIntegrationTest {
 
   @Autowired
-  MockMvc mockMvc;
+  private MockMvc mockMvc;
 
   @Autowired
-  ObjectMapper objectMapper;
+  private ObjectMapper objectMapper;
 
   @Autowired
-  ProductRepository productRepository;
+  private ProductRepository productRepository;
 
   @Test
   @DisplayName("Product should be persisted to the database and should be able retrieve it back")
@@ -48,27 +48,27 @@ class ProductIntegrationTest extends AbstractIntegrationTest {
             .content(objectMapper.writeValueAsString(productRequest)))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.id").exists())
-        .andExpect(jsonPath("$.name").value(productRequest.getName()))
-        .andExpect(jsonPath("$.description").value(productRequest.getDescription()))
-        .andExpect(jsonPath("$.price").value(productRequest.getPrice()))
-        .andExpect(jsonPath("$.skuCode").value(productRequest.getSkuCode()))
+        .andExpect(jsonPath("$.name").value(productRequest.name()))
+        .andExpect(jsonPath("$.description").value(productRequest.description()))
+        .andExpect(jsonPath("$.price").value(productRequest.price()))
+        .andExpect(jsonPath("$.skuCode").value(productRequest.skuCode()))
         .andExpect(header().exists(LOCATION))
         .andReturn();
 
     ProductResponse productResponse = objectMapper.readValue(
         postMvcResult.getResponse().getContentAsString(), ProductResponse.class);
 
-    final String expectedLocationHeaderValue = PRODUCT_BASE_URI + "/" + productResponse.getId();
+    final String expectedLocationHeaderValue = PRODUCT_BASE_URI + "/" + productResponse.id();
     assertEquals(expectedLocationHeaderValue, postMvcResult.getResponse().getHeaderValue(LOCATION),
         "Expected LOCATION header value should be returned");
 
     mockMvc.perform(get(expectedLocationHeaderValue))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.id").value(productResponse.getId()))
-        .andExpect(jsonPath("$.name").value(productResponse.getName()))
-        .andExpect(jsonPath("$.description").value(productResponse.getDescription()))
-        .andExpect(jsonPath("$.price").value(productResponse.getPrice()))
-        .andExpect(jsonPath("$.skuCode").value(productResponse.getSkuCode()))
+        .andExpect(jsonPath("$.id").value(productResponse.id()))
+        .andExpect(jsonPath("$.name").value(productResponse.name()))
+        .andExpect(jsonPath("$.description").value(productResponse.description()))
+        .andExpect(jsonPath("$.price").value(productResponse.price()))
+        .andExpect(jsonPath("$.skuCode").value(productResponse.skuCode()))
         .andReturn();
   }
 }

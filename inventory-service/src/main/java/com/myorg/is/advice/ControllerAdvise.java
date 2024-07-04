@@ -1,5 +1,6 @@
 package com.myorg.is.advice;
 
+import static java.util.stream.Collectors.toMap;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
@@ -15,7 +16,6 @@ import jakarta.validation.ConstraintViolationException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,8 +37,7 @@ public class ControllerAdvise {
         .getBindingResult()
         .getFieldErrors()
         .stream()
-        .collect(
-            Collectors.toMap(
+        .collect(toMap(
                 FieldError::getField,
                 DefaultMessageSourceResolvable::getDefaultMessage,
                 (existingValue, newValue) -> newValue,
@@ -55,7 +54,7 @@ public class ControllerAdvise {
     return constraintViolationException
         .getConstraintViolations()
         .stream()
-        .collect(Collectors.toMap(
+        .collect(toMap(
             constraintViolation -> {
               String propertyPath = constraintViolation.getPropertyPath().toString();
               return (propertyPath.contains("."))

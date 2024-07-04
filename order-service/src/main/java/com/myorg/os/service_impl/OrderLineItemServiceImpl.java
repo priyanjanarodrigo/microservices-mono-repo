@@ -1,12 +1,6 @@
 package com.myorg.os.service_impl;
 
-import static com.myorg.os.entity.mapper.OrderLineItemMapper.mapListOfOrderLineItemRequestsToListOfOrderLineItems;
-
-import com.myorg.os.entity.dto.request.order.OrderLineItemRequest;
-import com.myorg.os.entity.dto.response.order.OrderLineItemResponse;
-import com.myorg.os.entity.mapper.OrderLineItemMapper;
 import com.myorg.os.entity.model.OrderLineItem;
-import com.myorg.os.exception.InternalServerException;
 import com.myorg.os.repository.OrderLineItemRepository;
 import com.myorg.os.service.OrderLineItemService;
 import java.util.List;
@@ -23,18 +17,12 @@ public class OrderLineItemServiceImpl implements OrderLineItemService {
   private final OrderLineItemRepository orderLineItemRepository;
 
   @Override
-  public List<OrderLineItemResponse> createOrderLineItems(
-      List<OrderLineItemRequest> orderLineItemRequests, UUID orderId) {
+  public List<OrderLineItem> createOrderLineItems(
+      List<OrderLineItem> orderLineItems, UUID orderId) {
 
-    try {
-      List<OrderLineItem> orderLineItems = mapListOfOrderLineItemRequestsToListOfOrderLineItems(
-          orderLineItemRequests, orderId);
-      return OrderLineItemMapper.mapListOfOrderLineItemsToListOfOrderLineItemResponses(
-          this.orderLineItemRepository.saveAll(orderLineItems));
-    } catch (Exception exception) {
-      log.error(exception.getMessage());
-      throw new InternalServerException(
-          "Unexpected error occurred while creating order line items. " + exception.getMessage());
-    }
+    // Assigning the order ID to each order line item
+    orderLineItems.forEach(orderLineItem -> orderLineItem.setOrderId(orderId));
+
+    return orderLineItemRepository.saveAll(orderLineItems);
   }
 }

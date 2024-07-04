@@ -6,6 +6,7 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 import com.myorg.ps.entity.dto.response.error.ApiErrorResponse;
 import com.myorg.ps.exception.InternalServerException;
+import com.myorg.ps.exception.RedundantPropertyException;
 import com.myorg.ps.exception.ResourceNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
@@ -75,6 +76,12 @@ public class ControllerAdvise {
   public ResponseEntity<ApiErrorResponse> handleResourceNotFoundException(
       ResourceNotFoundException resourceNotFoundException, HttpServletRequest httpServletRequest) {
     return this.createErrorResponse(resourceNotFoundException, httpServletRequest, NOT_FOUND);
+  }
+
+  @ExceptionHandler(RedundantPropertyException.class)
+  public ResponseEntity<ApiErrorResponse> handleExceptionForBadRequests(
+      RuntimeException exception, HttpServletRequest httpServletRequest) {
+    return this.createErrorResponse(exception, httpServletRequest, BAD_REQUEST);
   }
 
   public ResponseEntity<ApiErrorResponse> createErrorResponse(RuntimeException exception,
