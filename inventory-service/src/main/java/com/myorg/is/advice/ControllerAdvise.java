@@ -6,6 +6,7 @@ import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 import com.myorg.is.entity.dto.response.error.ApiErrorResponse;
+import com.myorg.is.exception.BatchRequestValidationException;
 import com.myorg.is.exception.EmptyPatchRequestException;
 import com.myorg.is.exception.GeneralClientDataException;
 import com.myorg.is.exception.InternalServerException;
@@ -81,6 +82,21 @@ public class ControllerAdvise {
   public ResponseEntity<ApiErrorResponse> handleExceptionForBadRequests(
       RuntimeException exception, HttpServletRequest httpServletRequest) {
     return this.createErrorResponse(exception, httpServletRequest, BAD_REQUEST);
+  }
+
+  @ExceptionHandler(BatchRequestValidationException.class)
+  public ResponseEntity<ApiErrorResponse> handleBatchRequestValidationException(
+      BatchRequestValidationException exception, HttpServletRequest httpServletRequest) {
+
+    ApiErrorResponse apiErrorResponse = ApiErrorResponse.builder()
+        .statusCode(BAD_REQUEST.value())
+        .path(httpServletRequest.getRequestURI())
+        .message(exception.getMessage())
+        .timestamp(LocalDateTime.now())
+        .indexedValidationErrors(exception.getIndexedBatchRequestViolations())
+        .build();
+
+    return new ResponseEntity<>(apiErrorResponse, BAD_REQUEST);
   }
 
   public ResponseEntity<ApiErrorResponse> createErrorResponse(RuntimeException exception,

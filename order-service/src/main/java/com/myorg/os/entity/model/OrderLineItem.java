@@ -29,7 +29,7 @@ import lombok.ToString;
 public class OrderLineItem implements Serializable, Cloneable {
 
   @Serial
-  private static final long serialVersionUID = -6787163492749587764L;
+  private static final long serialVersionUID = -7981542792921564864L;
 
   @Id
   @Column(name = "ORDER_LINE_ITEM_ID")

@@ -8,6 +8,7 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 import com.myorg.os.entity.dto.response.error.ApiErrorResponse;
 import com.myorg.os.exception.BadRequestException;
+import com.myorg.os.exception.BatchRequestValidationException;
 import com.myorg.os.exception.InternalServerException;
 import com.myorg.os.exception.OutOfStockException;
 import com.myorg.os.exception.ResourceNotFoundException;
@@ -87,6 +88,21 @@ public class ControllerAdvise {
   public ResponseEntity<ApiErrorResponse> handleConflictException(
       RuntimeException runtimeException, HttpServletRequest httpServletRequest) {
     return this.createErrorResponse(runtimeException, httpServletRequest, CONFLICT);
+  }
+
+  @ExceptionHandler(BatchRequestValidationException.class)
+  public ResponseEntity<ApiErrorResponse> handleBatchRequestValidationException(
+      BatchRequestValidationException exception, HttpServletRequest httpServletRequest) {
+
+    ApiErrorResponse apiErrorResponse = ApiErrorResponse.builder()
+        .statusCode(BAD_REQUEST.value())
+        .path(httpServletRequest.getRequestURI())
+        .message(exception.getMessage())
+        .timestamp(LocalDateTime.now())
+        .indexedValidationErrors(exception.getIndexedBatchRequestViolations())
+        .build();
+
+    return new ResponseEntity<>(apiErrorResponse, BAD_REQUEST);
   }
 
   public ResponseEntity<ApiErrorResponse> createErrorResponse(RuntimeException exception,

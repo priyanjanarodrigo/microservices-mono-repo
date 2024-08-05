@@ -1,18 +1,22 @@
 package com.myorg.is.controller;
 
 import static com.myorg.is.util.Constants.INVENTORY_BASE_URI;
+import static com.myorg.is.validation.BatchRequestValidator.getQuantityReduceBatchRequestViolations;
 import static java.net.URI.create;
 import static org.springframework.http.ResponseEntity.created;
 import static org.springframework.http.ResponseEntity.ok;
 
 import com.myorg.is.entity.dto.request.InventoryPatchRequest;
 import com.myorg.is.entity.dto.request.InventoryRequest;
-import com.myorg.is.entity.dto.request.SkuCodeBasedQuantityReduceRequest;
+import com.myorg.is.entity.dto.request.QuantityReduceRequest;
 import com.myorg.is.entity.dto.response.inventory.InventoryResponse;
+import com.myorg.is.entity.dto.validation.Violation;
+import com.myorg.is.exception.BatchRequestValidationException;
 import com.myorg.is.service.InventoryService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import java.util.LinkedHashMap;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -91,11 +95,18 @@ public class InventoryController {
 
   @PutMapping("/skuCodes/reduceQuantities")
   public ResponseEntity<List<InventoryResponse>> reduceQuantitiesBySkuCode(
-      @RequestBody @Valid SkuCodeBasedQuantityReduceRequest skuCodeBasedQuantityReduceRequest) {
-    log.info("reduceQuantitiesBySkuCode invoked with request payload: {}",
-        skuCodeBasedQuantityReduceRequest);
+      @RequestBody List<QuantityReduceRequest> quantityReduceRequests) {
+    log.info("reduceQuantitiesBySkuCode invoked with request payload: {}", quantityReduceRequests);
 
-    return ok(inventoryService.reduceQuantitiesBySkuCodes(
-        skuCodeBasedQuantityReduceRequest.quantityReduceRequests()));
+    LinkedHashMap<Integer, List<Violation>> violations = getQuantityReduceBatchRequestViolations(
+        quantityReduceRequests);
+
+    if (!violations.isEmpty()) {
+      throw new BatchRequestValidationException("Invalid batch request payload", violations);
+    }
+
+    // TODO: Address the scenario where the skuCode is duplicated in the request payload items.
+
+    return ok(inventoryService.reduceQuantitiesBySkuCodes(quantityReduceRequests));
   }
 }

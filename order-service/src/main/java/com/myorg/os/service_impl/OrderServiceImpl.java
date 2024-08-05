@@ -8,18 +8,19 @@ import static java.util.stream.Collectors.toMap;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.resolve;
+import static reactor.core.publisher.Mono.error;
 
 import com.myorg.os.entity.dto.request.inventory.QuantityReduceRequest;
-import com.myorg.os.entity.dto.request.inventory.SkuCodeBasedQuantityReduceRequest;
 import com.myorg.os.entity.dto.request.order.OrderLineItemRequest;
 import com.myorg.os.entity.dto.request.order.OrderRequest;
 import com.myorg.os.entity.dto.response.error.ApiErrorResponse;
 import com.myorg.os.entity.dto.response.inventory.InventoryResponse;
 import com.myorg.os.entity.dto.response.order.OrderResponse;
 import com.myorg.os.entity.dto.response.product.ProductResponse;
+import com.myorg.os.entity.dto.validation.Violation;
 import com.myorg.os.entity.model.Order;
 import com.myorg.os.entity.model.OrderLineItem;
-import com.myorg.os.exception.BadRequestException;
+import com.myorg.os.exception.BatchRequestValidationException;
 import com.myorg.os.exception.InternalServerException;
 import com.myorg.os.exception.OutOfStockException;
 import com.myorg.os.exception.ResourceNotFoundException;
@@ -28,6 +29,7 @@ import com.myorg.os.service.OrderLineItemService;
 import com.myorg.os.service.OrderService;
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -49,7 +51,7 @@ public class OrderServiceImpl implements OrderService {
 
   private final OrderLineItemService orderLineItemService;
 
-  private final WebClient webClient;
+  private final WebClient.Builder webClientBuilder;
 
   @Override
   @Transactional
@@ -120,15 +122,10 @@ public class OrderServiceImpl implements OrderService {
             .build())
         .toList();
 
-    SkuCodeBasedQuantityReduceRequest skuCodeBasedQuantityReduceRequest =
-        SkuCodeBasedQuantityReduceRequest.builder()
-            .quantityReduceRequests(quantityReduceRequests)
-            .build();
-
-    return webClient
+    return webClientBuilder.build()
         .put()
-        .uri("http://localhost:8083/api/inventories/skuCodes/reduceQuantities")
-        .body(BodyInserters.fromValue(skuCodeBasedQuantityReduceRequest))
+        .uri("http://inventory-service/api/inventories/skuCodes/reduceQuantities")
+        .body(BodyInserters.fromValue(quantityReduceRequests))
         .retrieve()
         .onStatus(
             httpStatus -> requireNonNull(resolve(httpStatus.value())).isError()
@@ -136,11 +133,12 @@ public class OrderServiceImpl implements OrderService {
               HttpStatusCode httpStatusCode = webClientResponse.statusCode();
               if (httpStatusCode.equals(BAD_REQUEST)) {
                 return webClientResponse.bodyToMono(ApiErrorResponse.class)
-                    .flatMap(errorResponse -> Mono.error(
-                        new BadRequestException(errorResponse.message())));
+                    .flatMap(errorResponse -> error(
+                        new BatchRequestValidationException(errorResponse.message(),
+                            (LinkedHashMap<Integer, List<Violation>>) errorResponse.indexedValidationErrors())));
               } else {
                 return webClientResponse.bodyToMono(ApiErrorResponse.class)
-                    .flatMap(errorResponse -> Mono.error(
+                    .flatMap(errorResponse -> error(
                         new InternalServerException(errorResponse.message())));
               }
             })
@@ -194,9 +192,9 @@ public class OrderServiceImpl implements OrderService {
    * @return List<ProductResponse>
    */
   private List<ProductResponse> getProductsFromProductServiceBySkuCodes(List<String> skuCodes) {
-    return webClient
+    return webClientBuilder.build()
         .get()
-        .uri("http://localhost:8080/api/products/skuCodes",
+        .uri("http://product-service/api/products/skuCodes",
             uriBuilder -> uriBuilder.queryParam("skuCodes", skuCodes).build())
         .retrieve()
         .onStatus(
@@ -226,9 +224,9 @@ public class OrderServiceImpl implements OrderService {
    */
   private List<InventoryResponse> getInventoryFromInventoryServiceBySkuCodes(
       List<String> skuCodes) {
-    return webClient
+    return webClientBuilder.build()
         .get()
-        .uri("http://localhost:8083/api/inventories/skuCodes",
+        .uri("http://inventory-service/api/inventories/skuCodes",
             uriBuilder -> uriBuilder.queryParam("skuCodes", skuCodes).build())
         .retrieve()
         .onStatus(
@@ -237,11 +235,11 @@ public class OrderServiceImpl implements OrderService {
               HttpStatusCode httpStatusCode = webClientResponse.statusCode();
               if (httpStatusCode.equals(NOT_FOUND)) {
                 return webClientResponse.bodyToMono(ApiErrorResponse.class)
-                    .flatMap(errorResponse -> Mono.error(
+                    .flatMap(errorResponse -> error(
                         new ResourceNotFoundException(errorResponse.message())));
               } else {
                 return webClientResponse.bodyToMono(ApiErrorResponse.class)
-                    .flatMap(errorResponse -> Mono.error(
+                    .flatMap(errorResponse -> error(
                         new InternalServerException(errorResponse.message())));
               }
             })

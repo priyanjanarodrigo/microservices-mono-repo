@@ -21,8 +21,10 @@ import com.myorg.is.exception.ResourceNotFoundException;
 import com.myorg.is.repository.InventoryRepository;
 import com.myorg.is.service.InventoryService;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -75,19 +77,17 @@ public class InventoryServiceImpl implements InventoryService {
      *  3. The provided skuCode to be patched, must be associated with some other inventory
      *     record.
      * */
-    if (nonNull(inventoryPatchRequest.skuCode())
-        && !inventoryRecord.getSkuCode().equals(inventoryPatchRequest.skuCode())
+    if (nonNull(inventoryPatchRequest.skuCode()) && !inventoryRecord.getSkuCode()
+        .equals(inventoryPatchRequest.skuCode())
         // If it's not the same skuCode associated with this particular record
         && isExistingSkuCode(inventoryPatchRequest.skuCode())) {
-      throw new GeneralClientDataException(
-          "Provided skuCode: " + inventoryPatchRequest.skuCode()
-              + " is already associated with a different product related inventory record. "
-              + "Redundant skuCode is not allowed to be patched");
+      throw new GeneralClientDataException("Provided skuCode: " + inventoryPatchRequest.skuCode()
+          + " is already associated with a different product related inventory record. "
+          + "Redundant skuCode is not allowed to be patched");
     }
 
-    return mapInventoryToInventoryResponse(
-        saveInventoryEntity(mapInventoryPatchRequestToExistingInventory(inventoryRecord,
-            inventoryPatchRequest)));
+    return mapInventoryToInventoryResponse(saveInventoryEntity(
+        mapInventoryPatchRequestToExistingInventory(inventoryRecord, inventoryPatchRequest)));
   }
 
   @Override
@@ -113,10 +113,33 @@ public class InventoryServiceImpl implements InventoryService {
     return mapInventoriesInventoryResponses(inventoryRepository.findBySkuCodes(skuCodes));
   }
 
+  private List<String> getDuplicatedSkuCodes(List<QuantityReduceRequest> quantityReduceRequests) {
+    List<String> duplicatedSkuCodes = new ArrayList<>();
+    Set<String> skuCodesSet = new HashSet<>();
+
+    for (QuantityReduceRequest request : quantityReduceRequests) {
+      if (skuCodesSet.contains(request.skuCode())) {
+        duplicatedSkuCodes.add(request.skuCode());
+      } else {
+        skuCodesSet.add(request.skuCode());
+      }
+    }
+
+    return duplicatedSkuCodes;
+  }
+
   @Override
   @Transactional
   public List<InventoryResponse> reduceQuantitiesBySkuCodes(
       List<QuantityReduceRequest> quantityReduceRequests) {
+
+    List<String> duplicatedSkuCodes = getDuplicatedSkuCodes(quantityReduceRequests);
+    if (!duplicatedSkuCodes.isEmpty()) {
+      throw new GeneralClientDataException(
+          "Duplicated skuCodes are not allowed within the quantity reduce batch request "
+              + "payload. Duplicated skuCode(s): " + duplicatedSkuCodes);
+    }
+
     List<String> skuCodes = quantityReduceRequests.stream().map(QuantityReduceRequest::skuCode)
         .collect(toCollection(ArrayList::new));
 
@@ -157,8 +180,8 @@ public class InventoryServiceImpl implements InventoryService {
   }
 
   private Inventory findInventoryEntityRecordBySkuCode(String skuCode) {
-    return inventoryRepository.findBySkuCode(skuCode)
-        .orElseThrow(() -> new ResourceNotFoundException(
+    return inventoryRepository.findBySkuCode(skuCode).orElseThrow(
+        () -> new ResourceNotFoundException(
             "Inventory record not found for the skuCode: " + skuCode));
   }
 }
